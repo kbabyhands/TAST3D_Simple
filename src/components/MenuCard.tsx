@@ -84,23 +84,12 @@ export const MenuCard = ({ item }: MenuCardProps) => {
           {item.shortDescription}
         </p>
 
-        {/* Price and CTA */}
-        <div className="flex items-center justify-between">
+        {/* Price */}
+        <div className="flex items-center justify-start">
           <div>
             <span className="text-xs text-muted-foreground">Starting at</span>
             <div className="text-2xl font-bold text-foreground">{item.price}</div>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleExpanded();
-            }}
-            className="rounded-full hover:bg-primary hover:text-primary-foreground transition-colors"
-          >
-            Details
-          </Button>
         </div>
       </div>
 
