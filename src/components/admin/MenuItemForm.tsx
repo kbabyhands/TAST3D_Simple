@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Plus } from 'lucide-react';
 import { DatabaseMenuItem, MenuCategory } from '@/types/menu';
 
 interface MenuItemFormProps {
@@ -24,7 +25,10 @@ export function MenuItemForm({ item, onSave, onCancel }: MenuItemFormProps) {
     price: item?.price || 0,
     category: (item?.category as MenuCategory) || 'appetizers' as MenuCategory,
     is_available: item?.is_available ?? true,
+    allergens: item?.allergens || [],
   });
+  
+  const [newAllergen, setNewAllergen] = useState('');
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [htmlFile, setHtmlFile] = useState<File | null>(null);
@@ -35,6 +39,30 @@ export function MenuItemForm({ item, onSave, onCancel }: MenuItemFormProps) {
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addAllergen = () => {
+    if (newAllergen.trim() && !formData.allergens.includes(newAllergen.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        allergens: [...prev.allergens, newAllergen.trim()]
+      }));
+      setNewAllergen('');
+    }
+  };
+
+  const removeAllergen = (allergenToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      allergens: prev.allergens.filter(allergen => allergen !== allergenToRemove)
+    }));
+  };
+
+  const handleAllergenKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addAllergen();
+    }
   };
 
   const handleFileUpload = async (file: File, bucket: string): Promise<string | null> => {
@@ -180,6 +208,52 @@ export function MenuItemForm({ item, onSave, onCancel }: MenuItemFormProps) {
               placeholder="Describe your menu item..."
               className="min-h-[100px]"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Allergens</Label>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  value={newAllergen}
+                  onChange={(e) => setNewAllergen(e.target.value)}
+                  onKeyPress={handleAllergenKeyPress}
+                  placeholder="Add allergen (e.g., Gluten, Dairy, Nuts)"
+                  className="flex-1"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={addAllergen}
+                  disabled={!newAllergen.trim() || formData.allergens.includes(newAllergen.trim())}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {formData.allergens.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {formData.allergens.map((allergen) => (
+                    <Badge 
+                      key={allergen} 
+                      variant="outline" 
+                      className="bg-destructive/10 text-destructive border-destructive/20 pr-1"
+                    >
+                      {allergen}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 ml-1 hover:bg-destructive/20"
+                        onClick={() => removeAllergen(allergen)}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
