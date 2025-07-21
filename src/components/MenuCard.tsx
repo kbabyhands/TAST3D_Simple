@@ -26,7 +26,10 @@ export const MenuCard = ({ item }: MenuCardProps) => {
   };
 
   return (
-    <div className="group bg-card border border-border rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden">
+    <div 
+      className="group bg-card border border-border rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden cursor-pointer"
+      onClick={toggleExpanded}
+    >
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         {!imageError ? (
