@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
@@ -24,10 +24,6 @@ export const MenuCard = ({ item }: MenuCardProps) => {
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
-
-  // Generate a mock rating for demo purposes
-  const rating = 4.5 + Math.random() * 0.5;
-  const reviewCount = Math.floor(Math.random() * 50) + 1;
 
   return (
     <div className="group bg-card border border-border rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden">
@@ -81,32 +77,9 @@ export const MenuCard = ({ item }: MenuCardProps) => {
           {item.name}
         </h3>
         
-        <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+        <p className="text-muted-foreground text-sm mb-6 line-clamp-2 leading-relaxed">
           {item.shortDescription}
         </p>
-
-        {/* Rating */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i}
-                  className={cn(
-                    "h-4 w-4",
-                    i < Math.floor(rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                  )}
-                />
-              ))}
-            </div>
-            <span className="text-sm font-medium text-foreground">
-              {rating.toFixed(1)}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              ({reviewCount} reviews)
-            </span>
-          </div>
-        </div>
 
         {/* Price and CTA */}
         <div className="flex items-center justify-between">
