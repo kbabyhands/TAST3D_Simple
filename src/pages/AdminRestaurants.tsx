@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogOut, Plus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 import { Restaurant } from '@/types/restaurant';
 import { DatabaseMenuItem } from '@/types/menu';
 import { RestaurantForm } from '@/components/admin/RestaurantForm';
@@ -154,7 +155,14 @@ export default function AdminRestaurants() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
-            {currentView !== 'restaurants' && (
+            {currentView === 'restaurants' ? (
+              <Button variant="outline" asChild>
+                <Link to="/admin">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Admin
+                </Link>
+              </Button>
+            ) : (
               <Button variant="outline" onClick={goBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back
