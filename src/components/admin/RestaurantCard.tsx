@@ -2,15 +2,16 @@ import { Restaurant } from "@/types/restaurant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Mail, Menu } from "lucide-react";
+import { MapPin, Phone, Mail, Menu, Trash2 } from "lucide-react";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
   onManageMenu: (restaurant: Restaurant) => void;
   onEdit: (restaurant: Restaurant) => void;
+  onDelete: (restaurant: Restaurant) => void;
 }
 
-export function RestaurantCard({ restaurant, onManageMenu, onEdit }: RestaurantCardProps) {
+export function RestaurantCard({ restaurant, onManageMenu, onEdit, onDelete }: RestaurantCardProps) {
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -64,6 +65,13 @@ export function RestaurantCard({ restaurant, onManageMenu, onEdit }: RestaurantC
             onClick={() => onEdit(restaurant)}
           >
             Edit
+          </Button>
+          <Button 
+            variant="destructive" 
+            size="icon"
+            onClick={() => onDelete(restaurant)}
+          >
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </CardContent>

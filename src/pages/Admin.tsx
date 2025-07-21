@@ -197,6 +197,22 @@ export default function Admin() {
     }
   };
 
+  const handleDeleteRestaurant = async (restaurant: Restaurant) => {
+    try {
+      const { error } = await supabase
+        .from('restaurants')
+        .delete()
+        .eq('id', restaurant.id);
+
+      if (error) throw error;
+      
+      toast.success('Restaurant deleted');
+      fetchRestaurants();
+    } catch (error: any) {
+      toast.error('Failed to delete restaurant');
+    }
+  };
+
   const goBackToRestaurants = () => {
     setRestaurantView('list');
     setSelectedRestaurant(null);
@@ -258,6 +274,7 @@ export default function Admin() {
                   restaurants={restaurants}
                   onManageMenu={handleManageMenu}
                   onEdit={handleEditRestaurant}
+                  onDelete={handleDeleteRestaurant}
                 />
               </>
             )}

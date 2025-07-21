@@ -5,9 +5,10 @@ interface RestaurantsListProps {
   restaurants: Restaurant[];
   onManageMenu: (restaurant: Restaurant) => void;
   onEdit: (restaurant: Restaurant) => void;
+  onDelete: (restaurant: Restaurant) => void;
 }
 
-export function RestaurantsList({ restaurants, onManageMenu, onEdit }: RestaurantsListProps) {
+export function RestaurantsList({ restaurants, onManageMenu, onEdit, onDelete }: RestaurantsListProps) {
   if (restaurants.length === 0) {
     return (
       <div className="text-center py-8">
@@ -24,6 +25,7 @@ export function RestaurantsList({ restaurants, onManageMenu, onEdit }: Restauran
           restaurant={restaurant}
           onManageMenu={onManageMenu}
           onEdit={onEdit}
+          onDelete={onDelete}
         />
       ))}
     </div>
