@@ -51,15 +51,33 @@ const Index = () => {
   const sectionsToRender = hasDbItems 
     ? [
         { 
+          section: 'Featured Items', 
+          items: menuItems
+            .slice(0, 6) // Show first 6 items as featured
+            .map(item => ({
+              id: item.id,
+              name: item.name,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
+              price: `$${item.price.toFixed(2)}`,
+              dietaryTags: [],
+              allergens: [],
+              playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
+            }))
+        },
+        { 
           section: 'Appetizers', 
           items: menuItems
             .filter(item => item.category === 'appetizers')
             .map(item => ({
-              id: parseInt(item.id.replace(/-/g, '').substring(0, 8), 16),
+              id: item.id,
               name: item.name,
-              description: item.description,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
               price: `$${item.price.toFixed(2)}`,
-              modelUrl: item.model_url || '/3d-models/truffle-arancini.html'
+              dietaryTags: [],
+              allergens: [],
+              playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
             }))
         },
         { 
@@ -67,11 +85,14 @@ const Index = () => {
           items: menuItems
             .filter(item => item.category === 'entrees')
             .map(item => ({
-              id: parseInt(item.id.replace(/-/g, '').substring(0, 8), 16),
+              id: item.id,
               name: item.name,
-              description: item.description,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
               price: `$${item.price.toFixed(2)}`,
-              modelUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
+              dietaryTags: [],
+              allergens: [],
+              playCanvasUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
             }))
         },
         { 
@@ -79,47 +100,48 @@ const Index = () => {
           items: menuItems
             .filter(item => item.category === 'desserts')
             .map(item => ({
-              id: parseInt(item.id.replace(/-/g, '').substring(0, 8), 16),
+              id: item.id,
               name: item.name,
-              description: item.description,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
               price: `$${item.price.toFixed(2)}`,
-              modelUrl: item.model_url || '/3d-models/chocolate-souffle.html'
+              dietaryTags: [],
+              allergens: [],
+              playCanvasUrl: item.model_url || '/3d-models/chocolate-souffle.html'
             }))
         }
-      ]
+      ].filter(section => section.items.length > 0)
     : menuData;
 
   return (
-    <div className="min-h-screen bg-gradient-warm">
-      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex-1">
-            <MenuHeader />
-          </div>
-          <Link to="/auth">
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-2" />
-              Admin
-            </Button>
-          </Link>
-        </div>
-        
-        <main>
-          {sectionsToRender.map((section) => (
-            <MenuSection 
-              key={section.section}
-              section={section.section}
-              items={section.items}
-            />
-          ))}
-        </main>
-        
-        <footer className="text-center mt-12 sm:mt-16 pb-6">
-          <p className="text-muted-foreground text-sm">
-            Tap any dish to explore in 3D
-          </p>
-        </footer>
+    <div className="min-h-screen bg-background">
+      {/* Admin Button - Fixed Position */}
+      <div className="fixed top-4 right-4 z-40">
+        <Link to="/auth">
+          <Button variant="outline" size="sm" className="bg-background/80 backdrop-blur-sm">
+            <Settings className="w-4 h-4 mr-2" />
+            Admin
+          </Button>
+        </Link>
       </div>
+
+      <MenuHeader />
+      
+      <main className="container mx-auto px-4 pb-16">
+        {sectionsToRender.map((section) => (
+          <MenuSection 
+            key={section.section}
+            section={section.section}
+            items={section.items}
+          />
+        ))}
+      </main>
+      
+      <footer className="text-center pb-8">
+        <p className="text-muted-foreground">
+          Tap any dish to explore in 3D
+        </p>
+      </footer>
     </div>
   );
 };
