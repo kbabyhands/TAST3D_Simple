@@ -80,9 +80,24 @@ export const MenuCard = ({ item }: MenuCardProps) => {
           {item.name}
         </h3>
         
-        <p className="text-muted-foreground text-sm mb-6 line-clamp-2 leading-relaxed">
+        <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
           {item.shortDescription}
         </p>
+
+        {/* Allergen Tags */}
+        {item.allergens && item.allergens.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {item.allergens.map((allergen) => (
+              <Badge 
+                key={allergen} 
+                variant="outline" 
+                className="text-xs px-2 py-1 bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20"
+              >
+                {allergen}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         {/* Price */}
         <div className="flex items-center justify-start">

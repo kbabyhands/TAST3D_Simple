@@ -61,7 +61,7 @@ const Index = () => {
               fullDescription: item.description,
               price: `$${item.price.toFixed(2)}`,
               dietaryTags: [],
-              allergens: [],
+              allergens: item.allergens || [],
               playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
             }))
         },
@@ -76,7 +76,7 @@ const Index = () => {
               fullDescription: item.description,
               price: `$${item.price.toFixed(2)}`,
               dietaryTags: [],
-              allergens: [],
+              allergens: item.allergens || [],
               playCanvasUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
             }))
         },
@@ -91,7 +91,7 @@ const Index = () => {
               fullDescription: item.description,
               price: `$${item.price.toFixed(2)}`,
               dietaryTags: [],
-              allergens: [],
+              allergens: item.allergens || [],
               playCanvasUrl: item.model_url || '/3d-models/chocolate-souffle.html'
             }))
         }

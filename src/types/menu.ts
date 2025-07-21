@@ -7,6 +7,7 @@ export interface DatabaseMenuItem {
   image_url: string | null;
   model_url: string | null;
   is_available: boolean;
+  allergens: string[] | null;
   created_at?: string;
   updated_at?: string;
 }
