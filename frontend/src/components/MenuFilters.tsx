@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -26,15 +25,14 @@ export const MenuFilters = ({
   onAllergenChange,
   onClearFilters,
 }: MenuFiltersProps) => {
+  const [categoryPopoverOpen, setCategoryPopoverOpen] = useState(false);
   const [allergenPopoverOpen, setAllergenPopoverOpen] = useState(false);
 
-  const handleCategorySelect = (value: string) => {
-    if (value === 'all') {
-      onCategoryChange([]);
-    } else if (selectedCategories.includes(value)) {
-      onCategoryChange(selectedCategories.filter(c => c !== value));
+  const handleCategoryToggle = (category: string) => {
+    if (selectedCategories.includes(category)) {
+      onCategoryChange(selectedCategories.filter(c => c !== category));
     } else {
-      onCategoryChange([...selectedCategories, value]);
+      onCategoryChange([...selectedCategories, category]);
     }
   };
 
@@ -54,7 +52,7 @@ export const MenuFilters = ({
     } else if (selectedCategories.length === 1) {
       return selectedCategories[0].charAt(0).toUpperCase() + selectedCategories[0].slice(1);
     } else {
-      return `${selectedCategories.length} Categories`;
+      return `${selectedCategories.length} Categories Selected`;
     }
   };
 
@@ -96,37 +94,62 @@ export const MenuFilters = ({
             <label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
               Food Type
             </label>
-            <Select value={selectedCategories.length === 0 ? 'all' : 'custom'}>
-              <SelectTrigger className="w-full">
-                <SelectValue>
-                  {getCategoryDisplayText()}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem 
-                  value="all"
-                  onClick={() => onCategoryChange([])}
+            <Popover open={categoryPopoverOpen} onOpenChange={setCategoryPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 px-3 py-2 text-sm"
+                  role="combobox"
+                  aria-expanded={categoryPopoverOpen}
                 >
-                  All Categories
-                </SelectItem>
-                {categories.map((category) => (
-                  <SelectItem
-                    key={category}
-                    value={category}
-                    onClick={() => handleCategorySelect(category)}
+                  {getCategoryDisplayText()}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-4" align="start">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium mb-3">Select food categories:</p>
+                  <div
+                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-sm cursor-pointer"
+                    onClick={() => onCategoryChange([])}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="capitalize">{category}</span>
-                      {selectedCategories.includes(category) && (
-                        <Badge variant="default" className="ml-2 text-xs">
-                          Selected
-                        </Badge>
+                    <div className="flex items-center justify-center w-4 h-4 border border-input rounded-sm">
+                      {selectedCategories.length === 0 && (
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
                       )}
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    <span className="text-sm">All Categories</span>
+                  </div>
+                  {categories.map((category) => (
+                    <div key={category} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${category}`}
+                        checked={selectedCategories.includes(category)}
+                        onCheckedChange={() => handleCategoryToggle(category)}
+                      />
+                      <label
+                        htmlFor={`category-${category}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer capitalize"
+                      >
+                        {category}
+                      </label>
+                    </div>
+                  ))}
+                  {selectedCategories.length > 0 && (
+                    <div className="pt-2 mt-3 border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onCategoryChange([])}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear Category Filters
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Allergen Filter Dropdown */}
@@ -149,6 +172,17 @@ export const MenuFilters = ({
               <PopoverContent className="w-full p-4" align="start">
                 <div className="space-y-2">
                   <p className="text-sm font-medium mb-3">Select allergens to avoid:</p>
+                  <div
+                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-sm cursor-pointer"
+                    onClick={() => onAllergenChange([])}
+                  >
+                    <div className="flex items-center justify-center w-4 h-4 border border-input rounded-sm">
+                      {selectedAllergens.length === 0 && (
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      )}
+                    </div>
+                    <span className="text-sm">No Restrictions</span>
+                  </div>
                   {allergens.map((allergen) => (
                     <div key={allergen} className="flex items-center space-x-2">
                       <Checkbox
