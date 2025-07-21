@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LogOut, Plus, ArrowLeft } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LogOut, Plus, ArrowLeft, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { MenuItemForm } from '@/components/admin/MenuItemForm';
 import { MenuItemsList } from '@/components/admin/MenuItemsList';
@@ -21,6 +22,7 @@ export default function Admin() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [currentRestaurant, setCurrentRestaurant] = useState<Restaurant | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
+  const [selectedMenuRestaurant, setSelectedMenuRestaurant] = useState<Restaurant | null>(null);
   const [restaurantView, setRestaurantView] = useState<RestaurantView>('list');
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -71,6 +73,7 @@ export default function Admin() {
 
       if (restaurantError) throw restaurantError;
       setCurrentRestaurant(restaurantData);
+      setSelectedMenuRestaurant(restaurantData); // Set as default for menu tab
 
       const { data, error } = await supabase
         .from('menu_items')
@@ -88,13 +91,13 @@ export default function Admin() {
   };
 
   const fetchMenuItems = async () => {
-    if (!currentRestaurant) return;
+    if (!selectedMenuRestaurant) return;
     
     try {
       const { data, error } = await supabase
         .from('menu_items')
         .select('*')
-        .eq('restaurant_id', currentRestaurant.id)
+        .eq('restaurant_id', selectedMenuRestaurant.id)
         .order('category', { ascending: true });
 
       if (error) throw error;
@@ -107,7 +110,7 @@ export default function Admin() {
   const handleItemSaved = () => {
     if (selectedRestaurant) {
       fetchMenuItemsForRestaurant(selectedRestaurant.id);
-    } else {
+    } else if (selectedMenuRestaurant) {
       fetchMenuItems();
     }
     setShowForm(false);
@@ -133,7 +136,7 @@ export default function Admin() {
       
       if (selectedRestaurant) {
         fetchMenuItemsForRestaurant(selectedRestaurant.id);
-      } else {
+      } else if (selectedMenuRestaurant) {
         fetchMenuItems();
       }
     } catch (error: any) {
@@ -213,6 +216,21 @@ export default function Admin() {
     }
   };
 
+  const handleMenuRestaurantChange = (restaurantId: string) => {
+    const restaurant = restaurants.find(r => r.id === restaurantId);
+    if (restaurant) {
+      setSelectedMenuRestaurant(restaurant);
+      fetchMenuItemsForRestaurant(restaurant.id);
+    }
+  };
+
+  // Update menu items when selectedMenuRestaurant changes
+  useEffect(() => {
+    if (selectedMenuRestaurant) {
+      fetchMenuItems();
+    }
+  }, [selectedMenuRestaurant]);
+
   const goBackToRestaurants = () => {
     setRestaurantView('list');
     setSelectedRestaurant(null);
@@ -220,7 +238,6 @@ export default function Admin() {
     setEditingItem(null);
     setEditingRestaurant(null);
   };
-
   if (loading || loadingItems) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -344,10 +361,41 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="menu" className="space-y-6">
-            {showForm ? (
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <h2 className="text-2xl font-semibold">Menu Items</h2>
+                <Select
+                  value={selectedMenuRestaurant?.id || ''}
+                  onValueChange={handleMenuRestaurantChange}
+                >
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="Select a restaurant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {restaurants.map((restaurant) => (
+                      <SelectItem key={restaurant.id} value={restaurant.id}>
+                        {restaurant.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {selectedMenuRestaurant && (
+                <Button onClick={() => setShowForm(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Menu Item
+                </Button>
+              )}
+            </div>
+            
+            {!selectedMenuRestaurant ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Please select a restaurant to view its menu items.</p>
+              </div>
+            ) : showForm ? (
               <MenuItemForm 
                 item={editingItem}
-                restaurantId={currentRestaurant?.id || ''}
+                restaurantId={selectedMenuRestaurant.id}
                 onSave={handleItemSaved}
                 onCancel={() => {
                   setShowForm(false);
@@ -355,21 +403,11 @@ export default function Admin() {
                 }}
               />
             ) : (
-              <>
-                <div className="flex justify-between items-center">
-                  <h2 className="text-2xl font-semibold">Menu Items</h2>
-                  <Button onClick={() => setShowForm(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Menu Item
-                  </Button>
-                </div>
-                
-                <MenuItemsList 
-                  items={menuItems}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              </>
+              <MenuItemsList 
+                items={menuItems}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             )}
           </TabsContent>
 
