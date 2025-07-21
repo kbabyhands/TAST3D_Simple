@@ -101,3 +101,35 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Test the filtering functionality that was just added to the main menu page of this 3D Restaurant Menu application"
+
+frontend:
+  - task: "Menu Page Load and Filtering Functionality"
+    implemented: true
+    working: false
+    file: "/app/frontend/src/pages/Index.tsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing"
+          comment: "CRITICAL: React Hook error preventing page from rendering. Error: 'React has detected a change in the order of Hooks called by Index component'. The useMemo hooks are being called conditionally which violates Rules of Hooks. The page shows blank screen and filtering cannot be tested until this is fixed."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+
+test_plan:
+  current_focus:
+    - "Menu Page Load and Filtering Functionality"
+  stuck_tasks:
+    - "Menu Page Load and Filtering Functionality"
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+      message: "CRITICAL ISSUE FOUND: The Index.tsx component has a React Hooks rule violation. The useMemo hooks are being called conditionally based on loading state and data availability. This causes 'Rendered more hooks than during the previous render' error and prevents the entire page from rendering. The filtering functionality cannot be tested until this fundamental React issue is resolved. The main agent needs to fix the hook order by ensuring all hooks are called in the same order on every render, regardless of conditions."
