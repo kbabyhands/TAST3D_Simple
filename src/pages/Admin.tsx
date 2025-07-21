@@ -8,12 +8,14 @@ import { LogOut, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { MenuItemForm } from '@/components/admin/MenuItemForm';
 import { MenuItemsList } from '@/components/admin/MenuItemsList';
+import { RestaurantsList } from '@/components/admin/RestaurantsList';
 import { DatabaseMenuItem } from '@/types/menu';
 import { Restaurant } from '@/types/restaurant';
 
 export default function Admin() {
   const { user, signOut, isAdmin, loading } = useAuth();
   const [menuItems, setMenuItems] = useState<DatabaseMenuItem[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [currentRestaurant, setCurrentRestaurant] = useState<Restaurant | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<DatabaseMenuItem | null>(null);
@@ -33,8 +35,23 @@ export default function Admin() {
 
     if (user && isAdmin) {
       fetchCurrentRestaurant();
+      fetchRestaurants();
     }
   }, [user, isAdmin, loading]);
+
+  const fetchRestaurants = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('restaurants')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setRestaurants(data || []);
+    } catch (error: any) {
+      toast.error('Failed to load restaurants');
+    }
+  };
 
   const fetchCurrentRestaurant = async () => {
     try {
@@ -107,6 +124,16 @@ export default function Admin() {
     }
   };
 
+  const handleManageMenu = (restaurant: Restaurant) => {
+    // Navigate to the detailed restaurant management page
+    window.location.href = `/admin/restaurants`;
+  };
+
+  const handleEditRestaurant = (restaurant: Restaurant) => {
+    // Navigate to the detailed restaurant management page
+    window.location.href = `/admin/restaurants`;
+  };
+
   if (loading || loadingItems) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -146,17 +173,19 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="restaurants" className="space-y-6">
-            <div className="text-center py-8">
-              <Button 
-                onClick={() => window.location.href = '/admin/restaurants'} 
-                className="bg-primary hover:bg-primary/90"
-              >
-                Manage Restaurants & Menus
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-semibold">Restaurants</h2>
+              <Button onClick={() => window.location.href = '/admin/restaurants'}>
+                <Plus className="w-4 h-4 mr-2" />
+                Manage Restaurants
               </Button>
-              <p className="text-muted-foreground mt-4">
-                Click here to access the full restaurant management interface
-              </p>
             </div>
+            
+            <RestaurantsList 
+              restaurants={restaurants}
+              onManageMenu={handleManageMenu}
+              onEdit={handleEditRestaurant}
+            />
           </TabsContent>
 
           <TabsContent value="menu" className="space-y-6">
