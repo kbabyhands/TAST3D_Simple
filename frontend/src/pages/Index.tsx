@@ -39,11 +39,7 @@ const Index = () => {
     }
   };
 
-  // Use database items if available, otherwise use static data
-  const hasDbItems = menuItems.length > 0;
-  const allMenuItems = hasDbItems ? menuItems : [];
-
-  // For static fallback data, convert to the same format
+  // For static fallback data, convert to the same format - moved outside conditional
   const staticMenuItems = useMemo(() => menuData.flatMap(section =>
     section.items.map(item => ({
       id: item.id,
@@ -59,7 +55,9 @@ const Index = () => {
     }))
   ), []);
 
-  const itemsToUse = hasDbItems ? allMenuItems : staticMenuItems;
+  // Use database items if available, otherwise use static data
+  const hasDbItems = menuItems.length > 0;
+  const itemsToUse = hasDbItems ? menuItems : staticMenuItems;
 
   // Get all unique categories and allergens for filters
   const allCategories = useMemo(() => {
@@ -75,17 +73,6 @@ const Index = () => {
     });
     return Array.from(allergenSet).sort();
   }, [itemsToUse]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-warm flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading menu...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Filter menu items based on selected filters
   const filteredMenuItems = useMemo(() => {
@@ -109,85 +96,100 @@ const Index = () => {
     });
   }, [itemsToUse, selectedCategories, selectedAllergens]);
 
+  // Group filtered items by category for display
+  const sectionsToRender = useMemo(() => {
+    if (hasDbItems) {
+      return [
+        { 
+          section: 'Appetizers', 
+          items: filteredMenuItems
+            .filter(item => item.category === 'appetizers')
+            .map(item => ({
+              id: item.id,
+              name: item.name,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
+              price: `$${item.price.toFixed(2)}`,
+              dietaryTags: [],
+              allergens: item.allergens || [],
+              playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
+            }))
+        },
+        { 
+          section: 'Entrees', 
+          items: filteredMenuItems
+            .filter(item => item.category === 'entrees')
+            .map(item => ({
+              id: item.id,
+              name: item.name,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
+              price: `$${item.price.toFixed(2)}`,
+              dietaryTags: [],
+              allergens: item.allergens || [],
+              playCanvasUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
+            }))
+        },
+        { 
+          section: 'Desserts', 
+          items: filteredMenuItems
+            .filter(item => item.category === 'desserts')
+            .map(item => ({
+              id: item.id,
+              name: item.name,
+              shortDescription: item.description.substring(0, 120) + '...',
+              fullDescription: item.description,
+              price: `$${item.price.toFixed(2)}`,
+              dietaryTags: [],
+              allergens: item.allergens || [],
+              playCanvasUrl: item.model_url || '/3d-models/chocolate-souffle.html'
+            }))
+        }
+      ].filter(section => section.items.length > 0);
+    } else {
+      // For static data, apply filters differently
+      return menuData
+        .map(section => ({
+          ...section,
+          items: section.items.filter(item => {
+            // Filter by category for static data
+            if (selectedCategories.length > 0 && !selectedCategories.includes(section.section.toLowerCase())) {
+              return false;
+            }
+            
+            // Filter by allergens for static data
+            if (selectedAllergens.length > 0) {
+              const hasSelectedAllergens = selectedAllergens.some(allergen => 
+                item.allergens.includes(allergen)
+              );
+              if (hasSelectedAllergens) {
+                return false;
+              }
+            }
+            
+            return true;
+          })
+        }))
+        .filter(section => section.items.length > 0);
+    }
+  }, [hasDbItems, filteredMenuItems, selectedCategories, selectedAllergens]);
+
   const handleClearFilters = () => {
     setSelectedCategories([]);
     setSelectedAllergens([]);
   };
 
-  // Group filtered items by category for display
-  const sectionsToRender = useMemo(() => {
-    return hasDbItems 
-      ? [
-          { 
-            section: 'Appetizers', 
-            items: filteredMenuItems
-              .filter(item => item.category === 'appetizers')
-              .map(item => ({
-                id: item.id,
-                name: item.name,
-                shortDescription: item.description.substring(0, 120) + '...',
-                fullDescription: item.description,
-                price: `$${item.price.toFixed(2)}`,
-                dietaryTags: [],
-                allergens: item.allergens || [],
-                playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
-              }))
-          },
-          { 
-            section: 'Entrees', 
-            items: filteredMenuItems
-              .filter(item => item.category === 'entrees')
-              .map(item => ({
-                id: item.id,
-                name: item.name,
-                shortDescription: item.description.substring(0, 120) + '...',
-                fullDescription: item.description,
-                price: `$${item.price.toFixed(2)}`,
-                dietaryTags: [],
-                allergens: item.allergens || [],
-                playCanvasUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
-              }))
-          },
-          { 
-            section: 'Desserts', 
-            items: filteredMenuItems
-              .filter(item => item.category === 'desserts')
-              .map(item => ({
-                id: item.id,
-                name: item.name,
-                shortDescription: item.description.substring(0, 120) + '...',
-                fullDescription: item.description,
-                price: `$${item.price.toFixed(2)}`,
-                dietaryTags: [],
-                allergens: item.allergens || [],
-                playCanvasUrl: item.model_url || '/3d-models/chocolate-souffle.html'
-              }))
-          }
-        ].filter(section => section.items.length > 0)
-      : menuData
-          .map(section => ({
-            ...section,
-            items: section.items.filter(item => {
-              // Filter by category for static data
-              if (selectedCategories.length > 0 && !selectedCategories.includes(section.section.toLowerCase())) {
-                return false;
-              }
-              
-              // Filter by allergens for static data
-              if (selectedAllergens.length > 0) {
-                const hasSelectedAllergens = selectedAllergens.some(allergen => 
-                  item.allergens.includes(allergen)
-                );
-                if (hasSelectedAllergens) {
-                  return false;
-                }
-              }
-              
-              return true;
-            })
-          }))
-          .filter(section => section.items.length > 0);
-  }, [hasDbItems, filteredMenuItems, selectedCategories, selectedAllergens]);
+  // Early return for loading state - after all hooks are declared
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-warm flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
