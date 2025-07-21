@@ -39,23 +39,12 @@ const Index = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-warm flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading menu...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Use database items if available, otherwise use static data
   const hasDbItems = menuItems.length > 0;
   const allMenuItems = hasDbItems ? menuItems : [];
 
   // For static fallback data, convert to the same format
-  const staticMenuItems = menuData.flatMap(section =>
+  const staticMenuItems = useMemo(() => menuData.flatMap(section =>
     section.items.map(item => ({
       id: item.id,
       name: item.name,
@@ -68,7 +57,7 @@ const Index = () => {
       allergens: item.allergens,
       restaurant_id: 'default'
     }))
-  );
+  ), []);
 
   const itemsToUse = hasDbItems ? allMenuItems : staticMenuItems;
 
@@ -86,6 +75,17 @@ const Index = () => {
     });
     return Array.from(allergenSet).sort();
   }, [itemsToUse]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-warm flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-muted-foreground">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Filter menu items based on selected filters
   const filteredMenuItems = useMemo(() => {
