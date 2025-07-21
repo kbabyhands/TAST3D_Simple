@@ -100,7 +100,12 @@ export default function RestaurantMenu() {
         {/* Custom Header for Restaurant */}
         <header className="relative h-[50vh] flex items-center justify-center text-center mb-16 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&h=1200&fit=crop')] bg-cover bg-center opacity-30"></div>
+          <div 
+            className="absolute inset-0 bg-cover bg-center opacity-30"
+            style={{
+              backgroundImage: `url(${restaurant.header_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1600&h=1200&fit=crop'})`
+            }}
+          ></div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/40"></div>
           
           <div className="relative z-10 max-w-4xl mx-auto px-4">

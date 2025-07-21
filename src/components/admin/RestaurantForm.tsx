@@ -22,6 +22,7 @@ export function RestaurantForm({ restaurant, onSaved, onCancel }: RestaurantForm
     address: restaurant?.address || "",
     phone: restaurant?.phone || "",
     email: restaurant?.email || "",
+    header_image_url: restaurant?.header_image_url || "",
     is_active: restaurant?.is_active ?? true,
   });
   const [loading, setLoading] = useState(false);
@@ -115,6 +116,20 @@ export function RestaurantForm({ restaurant, onSaved, onCancel }: RestaurantForm
               value={formData.email}
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="header_image_url">Header Image URL</Label>
+            <Input
+              id="header_image_url"
+              type="url"
+              value={formData.header_image_url}
+              onChange={(e) => setFormData(prev => ({ ...prev, header_image_url: e.target.value }))}
+              placeholder="https://example.com/header-image.jpg"
+            />
+            <p className="text-sm text-muted-foreground mt-1">
+              Optional. URL of the image to display in the menu header.
+            </p>
           </div>
 
           <div className="flex items-center space-x-2">

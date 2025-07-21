@@ -6,6 +6,7 @@ export interface Restaurant {
   phone: string | null;
   email: string | null;
   is_active: boolean;
+  header_image_url?: string | null;
   created_at?: string;
   updated_at?: string;
 }
