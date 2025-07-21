@@ -115,77 +115,79 @@ const Index = () => {
   };
 
   // Group filtered items by category for display
-  const sectionsToRender = hasDbItems 
-    ? [
-        { 
-          section: 'Appetizers', 
-          items: filteredMenuItems
-            .filter(item => item.category === 'appetizers')
-            .map(item => ({
-              id: item.id,
-              name: item.name,
-              shortDescription: item.description.substring(0, 120) + '...',
-              fullDescription: item.description,
-              price: `$${item.price.toFixed(2)}`,
-              dietaryTags: [],
-              allergens: item.allergens || [],
-              playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
-            }))
-        },
-        { 
-          section: 'Entrees', 
-          items: filteredMenuItems
-            .filter(item => item.category === 'entrees')
-            .map(item => ({
-              id: item.id,
-              name: item.name,
-              shortDescription: item.description.substring(0, 120) + '...',
-              fullDescription: item.description,
-              price: `$${item.price.toFixed(2)}`,
-              dietaryTags: [],
-              allergens: item.allergens || [],
-              playCanvasUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
-            }))
-        },
-        { 
-          section: 'Desserts', 
-          items: filteredMenuItems
-            .filter(item => item.category === 'desserts')
-            .map(item => ({
-              id: item.id,
-              name: item.name,
-              shortDescription: item.description.substring(0, 120) + '...',
-              fullDescription: item.description,
-              price: `$${item.price.toFixed(2)}`,
-              dietaryTags: [],
-              allergens: item.allergens || [],
-              playCanvasUrl: item.model_url || '/3d-models/chocolate-souffle.html'
-            }))
-        }
-      ].filter(section => section.items.length > 0)
-    : menuData
-        .map(section => ({
-          ...section,
-          items: section.items.filter(item => {
-            // Filter by category for static data
-            if (selectedCategories.length > 0 && !selectedCategories.includes(section.section.toLowerCase())) {
-              return false;
-            }
-            
-            // Filter by allergens for static data
-            if (selectedAllergens.length > 0) {
-              const hasSelectedAllergens = selectedAllergens.some(allergen => 
-                item.allergens.includes(allergen)
-              );
-              if (hasSelectedAllergens) {
+  const sectionsToRender = useMemo(() => {
+    return hasDbItems 
+      ? [
+          { 
+            section: 'Appetizers', 
+            items: filteredMenuItems
+              .filter(item => item.category === 'appetizers')
+              .map(item => ({
+                id: item.id,
+                name: item.name,
+                shortDescription: item.description.substring(0, 120) + '...',
+                fullDescription: item.description,
+                price: `$${item.price.toFixed(2)}`,
+                dietaryTags: [],
+                allergens: item.allergens || [],
+                playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
+              }))
+          },
+          { 
+            section: 'Entrees', 
+            items: filteredMenuItems
+              .filter(item => item.category === 'entrees')
+              .map(item => ({
+                id: item.id,
+                name: item.name,
+                shortDescription: item.description.substring(0, 120) + '...',
+                fullDescription: item.description,
+                price: `$${item.price.toFixed(2)}`,
+                dietaryTags: [],
+                allergens: item.allergens || [],
+                playCanvasUrl: item.model_url || '/3d-models/wagyu-ribeye.html'
+              }))
+          },
+          { 
+            section: 'Desserts', 
+            items: filteredMenuItems
+              .filter(item => item.category === 'desserts')
+              .map(item => ({
+                id: item.id,
+                name: item.name,
+                shortDescription: item.description.substring(0, 120) + '...',
+                fullDescription: item.description,
+                price: `$${item.price.toFixed(2)}`,
+                dietaryTags: [],
+                allergens: item.allergens || [],
+                playCanvasUrl: item.model_url || '/3d-models/chocolate-souffle.html'
+              }))
+          }
+        ].filter(section => section.items.length > 0)
+      : menuData
+          .map(section => ({
+            ...section,
+            items: section.items.filter(item => {
+              // Filter by category for static data
+              if (selectedCategories.length > 0 && !selectedCategories.includes(section.section.toLowerCase())) {
                 return false;
               }
-            }
-            
-            return true;
-          })
-        }))
-        .filter(section => section.items.length > 0);
+              
+              // Filter by allergens for static data
+              if (selectedAllergens.length > 0) {
+                const hasSelectedAllergens = selectedAllergens.some(allergen => 
+                  item.allergens.includes(allergen)
+                );
+                if (hasSelectedAllergens) {
+                  return false;
+                }
+              }
+              
+              return true;
+            })
+          }))
+          .filter(section => section.items.length > 0);
+  }, [hasDbItems, filteredMenuItems, selectedCategories, selectedAllergens]);
 
   return (
     <div className="min-h-screen bg-background">
