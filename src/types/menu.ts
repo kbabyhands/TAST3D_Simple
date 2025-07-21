@@ -8,6 +8,7 @@ export interface DatabaseMenuItem {
   model_url: string | null;
   is_available: boolean;
   allergens: string[] | null;
+  restaurant_id: string;
   created_at?: string;
   updated_at?: string;
 }

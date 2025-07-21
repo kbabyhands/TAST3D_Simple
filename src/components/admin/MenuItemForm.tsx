@@ -14,11 +14,12 @@ import { DatabaseMenuItem, MenuCategory } from '@/types/menu';
 
 interface MenuItemFormProps {
   item?: DatabaseMenuItem | null;
+  restaurantId: string;
   onSave: () => void;
   onCancel: () => void;
 }
 
-export function MenuItemForm({ item, onSave, onCancel }: MenuItemFormProps) {
+export function MenuItemForm({ item, restaurantId, onSave, onCancel }: MenuItemFormProps) {
   const [formData, setFormData] = useState({
     name: item?.name || '',
     description: item?.description || '',
@@ -133,7 +134,7 @@ export function MenuItemForm({ item, onSave, onCancel }: MenuItemFormProps) {
         // Create new item
         const { error } = await supabase
           .from('menu_items')
-          .insert([menuItemData]);
+          .insert([{ ...menuItemData, restaurant_id: restaurantId }]);
 
         if (error) throw error;
         toast.success('Menu item created successfully');

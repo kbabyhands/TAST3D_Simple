@@ -26,6 +26,7 @@ export type Database = {
           model_url: string | null
           name: string
           price: number
+          restaurant_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           model_url?: string | null
           name: string
           price: number
+          restaurant_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -52,9 +54,18 @@ export type Database = {
           model_url?: string | null
           name?: string
           price?: number
+          restaurant_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -77,6 +88,42 @@ export type Database = {
           id?: string
           role?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      restaurants: {
+        Row: {
+          address: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }

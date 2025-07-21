@@ -9,10 +9,12 @@ import { toast } from 'sonner';
 import { MenuItemForm } from '@/components/admin/MenuItemForm';
 import { MenuItemsList } from '@/components/admin/MenuItemsList';
 import { DatabaseMenuItem } from '@/types/menu';
+import { Restaurant } from '@/types/restaurant';
 
 export default function Admin() {
   const { user, signOut, isAdmin, loading } = useAuth();
   const [menuItems, setMenuItems] = useState<DatabaseMenuItem[]>([]);
+  const [currentRestaurant, setCurrentRestaurant] = useState<Restaurant | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<DatabaseMenuItem | null>(null);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -30,15 +32,26 @@ export default function Admin() {
     }
 
     if (user && isAdmin) {
-      fetchMenuItems();
+      fetchCurrentRestaurant();
     }
   }, [user, isAdmin, loading]);
 
-  const fetchMenuItems = async () => {
+  const fetchCurrentRestaurant = async () => {
     try {
+      // Get the first restaurant for backward compatibility
+      const { data: restaurantData, error: restaurantError } = await supabase
+        .from('restaurants')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (restaurantError) throw restaurantError;
+      setCurrentRestaurant(restaurantData);
+
       const { data, error } = await supabase
         .from('menu_items')
         .select('*')
+        .eq('restaurant_id', restaurantData.id)
         .order('category', { ascending: true });
 
       if (error) throw error;
@@ -47,6 +60,23 @@ export default function Admin() {
       toast.error('Failed to load menu items');
     } finally {
       setLoadingItems(false);
+    }
+  };
+
+  const fetchMenuItems = async () => {
+    if (!currentRestaurant) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('menu_items')
+        .select('*')
+        .eq('restaurant_id', currentRestaurant.id)
+        .order('category', { ascending: true });
+
+      if (error) throw error;
+      setMenuItems(data || []);
+    } catch (error: any) {
+      toast.error('Failed to load menu items');
     }
   };
 
@@ -108,16 +138,32 @@ export default function Admin() {
         </div>
 
         {/* Content */}
-        <Tabs defaultValue="menu" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="restaurants" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
             <TabsTrigger value="menu">Menu Management</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="restaurants" className="space-y-6">
+            <div className="text-center py-8">
+              <Button 
+                onClick={() => window.location.href = '/admin/restaurants'} 
+                className="bg-primary hover:bg-primary/90"
+              >
+                Manage Restaurants & Menus
+              </Button>
+              <p className="text-muted-foreground mt-4">
+                Click here to access the full restaurant management interface
+              </p>
+            </div>
+          </TabsContent>
 
           <TabsContent value="menu" className="space-y-6">
             {showForm ? (
               <MenuItemForm 
                 item={editingItem}
+                restaurantId={currentRestaurant?.id || ''}
                 onSave={handleItemSaved}
                 onCancel={() => {
                   setShowForm(false);
