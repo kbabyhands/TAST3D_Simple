@@ -4,8 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Plus, ArrowLeft, ChevronDown } from 'lucide-react';
+import { LogOut, Plus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { MenuItemForm } from '@/components/admin/MenuItemForm';
 import { MenuItemsList } from '@/components/admin/MenuItemsList';
@@ -18,14 +17,10 @@ type RestaurantView = 'list' | 'form' | 'menu-management';
 
 export default function Admin() {
   const { user, signOut, isAdmin, loading } = useAuth();
-  const [menuItems, setMenuItems] = useState<DatabaseMenuItem[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [currentRestaurant, setCurrentRestaurant] = useState<Restaurant | null>(null);
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
-  const [selectedMenuRestaurant, setSelectedMenuRestaurant] = useState<Restaurant | null>(null);
   const [restaurantView, setRestaurantView] = useState<RestaurantView>('list');
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
-  const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<DatabaseMenuItem | null>(null);
   const [showMenuItemForm, setShowMenuItemForm] = useState(false);
   const [loadingItems, setLoadingItems] = useState(true);
@@ -43,8 +38,8 @@ export default function Admin() {
     }
 
     if (user && isAdmin) {
-      fetchCurrentRestaurant();
       fetchRestaurants();
+      setLoadingItems(false);
     }
   }, [user, isAdmin, loading]);
 
@@ -59,88 +54,6 @@ export default function Admin() {
       setRestaurants(data || []);
     } catch (error: any) {
       toast.error('Failed to load restaurants');
-    }
-  };
-
-  const fetchCurrentRestaurant = async () => {
-    try {
-      // Get the first restaurant for backward compatibility
-      const { data: restaurantData, error: restaurantError } = await supabase
-        .from('restaurants')
-        .select('*')
-        .limit(1)
-        .single();
-
-      if (restaurantError) throw restaurantError;
-      setCurrentRestaurant(restaurantData);
-      setSelectedMenuRestaurant(restaurantData); // Set as default for menu tab
-
-      const { data, error } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('restaurant_id', restaurantData.id)
-        .order('category', { ascending: true });
-
-      if (error) throw error;
-      setMenuItems(data || []);
-    } catch (error: any) {
-      toast.error('Failed to load menu items');
-    } finally {
-      setLoadingItems(false);
-    }
-  };
-
-  const fetchMenuItems = async () => {
-    if (!selectedMenuRestaurant) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('menu_items')
-        .select('*')
-        .eq('restaurant_id', selectedMenuRestaurant.id)
-        .order('category', { ascending: true });
-
-      if (error) throw error;
-      setMenuItems(data || []);
-    } catch (error: any) {
-      toast.error('Failed to load menu items');
-    }
-  };
-
-  const handleItemSaved = () => {
-    if (selectedRestaurant) {
-      fetchMenuItemsForRestaurant(selectedRestaurant.id);
-    } else if (selectedMenuRestaurant) {
-      fetchMenuItems();
-    }
-    setShowForm(false);
-    setShowMenuItemForm(false);
-    setEditingItem(null);
-  };
-
-  const handleEdit = (item: DatabaseMenuItem) => {
-    setEditingItem(item);
-    setShowForm(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('menu_items')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      toast.success('Menu item deleted');
-      
-      if (selectedRestaurant) {
-        fetchMenuItemsForRestaurant(selectedRestaurant.id);
-      } else if (selectedMenuRestaurant) {
-        fetchMenuItems();
-      }
-    } catch (error: any) {
-      toast.error('Failed to delete menu item');
     }
   };
 
@@ -160,6 +73,8 @@ export default function Admin() {
     }
   };
 
+  const [menuItems, setMenuItems] = useState<DatabaseMenuItem[]>([]);
+
   const handleRestaurantSaved = () => {
     fetchRestaurants();
     setRestaurantView('list');
@@ -175,6 +90,14 @@ export default function Admin() {
     setSelectedRestaurant(restaurant);
     setRestaurantView('menu-management');
     fetchMenuItemsForRestaurant(restaurant.id);
+  };
+
+  const handleItemSaved = () => {
+    if (selectedRestaurant) {
+      fetchMenuItemsForRestaurant(selectedRestaurant.id);
+    }
+    setShowMenuItemForm(false);
+    setEditingItem(null);
   };
 
   const handleMenuItemEdit = (item: DatabaseMenuItem) => {
@@ -216,21 +139,6 @@ export default function Admin() {
     }
   };
 
-  const handleMenuRestaurantChange = (restaurantId: string) => {
-    const restaurant = restaurants.find(r => r.id === restaurantId);
-    if (restaurant) {
-      setSelectedMenuRestaurant(restaurant);
-      fetchMenuItemsForRestaurant(restaurant.id);
-    }
-  };
-
-  // Update menu items when selectedMenuRestaurant changes
-  useEffect(() => {
-    if (selectedMenuRestaurant) {
-      fetchMenuItems();
-    }
-  }, [selectedMenuRestaurant]);
-
   const goBackToRestaurants = () => {
     setRestaurantView('list');
     setSelectedRestaurant(null);
@@ -270,9 +178,8 @@ export default function Admin() {
 
         {/* Content */}
         <Tabs defaultValue="restaurants" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="restaurants">Restaurants</TabsTrigger>
-            <TabsTrigger value="menu">Menu Management</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -357,57 +264,6 @@ export default function Admin() {
                   </>
                 )}
               </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="menu" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-semibold">Menu Items</h2>
-                <Select
-                  value={selectedMenuRestaurant?.id || ''}
-                  onValueChange={handleMenuRestaurantChange}
-                >
-                  <SelectTrigger className="w-64">
-                    <SelectValue placeholder="Select a restaurant" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {restaurants.map((restaurant) => (
-                      <SelectItem key={restaurant.id} value={restaurant.id}>
-                        {restaurant.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {selectedMenuRestaurant && (
-                <Button onClick={() => setShowForm(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Menu Item
-                </Button>
-              )}
-            </div>
-            
-            {!selectedMenuRestaurant ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Please select a restaurant to view its menu items.</p>
-              </div>
-            ) : showForm ? (
-              <MenuItemForm 
-                item={editingItem}
-                restaurantId={selectedMenuRestaurant.id}
-                onSave={handleItemSaved}
-                onCancel={() => {
-                  setShowForm(false);
-                  setEditingItem(null);
-                }}
-              />
-            ) : (
-              <MenuItemsList 
-                items={menuItems}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
             )}
           </TabsContent>
 
