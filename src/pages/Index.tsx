@@ -100,16 +100,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin Button - Fixed Position */}
-      <div className="fixed top-4 right-4 z-40">
-        <Link to="/auth">
-          <Button variant="outline" size="sm" className="bg-background/80 backdrop-blur-sm">
-            <Settings className="w-4 h-4 mr-2" />
-            Admin
-          </Button>
-        </Link>
-      </div>
-
       <MenuHeader />
       
       <main className="container mx-auto px-4 pb-16">
@@ -122,10 +112,18 @@ const Index = () => {
         ))}
       </main>
       
-      <footer className="text-center pb-8">
+      <footer className="text-center pb-8 space-y-4">
         <p className="text-muted-foreground">
           Tap any dish to explore in 3D
         </p>
+        <div>
+          <Link to="/auth">
+            <Button variant="ghost" size="sm" className="text-xs">
+              <Settings className="w-3 h-3 mr-1" />
+              Admin
+            </Button>
+          </Link>
+        </div>
       </footer>
     </div>
   );
