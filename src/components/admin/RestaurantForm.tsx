@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -119,17 +120,14 @@ export function RestaurantForm({ restaurant, onSaved, onCancel }: RestaurantForm
           </div>
 
           <div>
-            <Label htmlFor="header_image_url">Header Image URL</Label>
-            <Input
-              id="header_image_url"
-              type="url"
+            <ImageUpload
               value={formData.header_image_url}
-              onChange={(e) => setFormData(prev => ({ ...prev, header_image_url: e.target.value }))}
-              placeholder="https://example.com/header-image.jpg"
+              onChange={(url) => setFormData(prev => ({ ...prev, header_image_url: url }))}
+              onRemove={() => setFormData(prev => ({ ...prev, header_image_url: "" }))}
+              label="Header Image"
+              description="Upload an image for the menu header (max 5MB, JPG/PNG)"
+              maxSize={5}
             />
-            <p className="text-sm text-muted-foreground mt-1">
-              Optional. URL of the image to display in the menu header.
-            </p>
           </div>
 
           <div className="flex items-center space-x-2">
