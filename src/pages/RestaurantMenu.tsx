@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { MenuSection } from '@/components/MenuSection';
+import { MenuFilters } from '@/components/MenuFilters';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { DatabaseMenuItem } from '@/types/menu';
@@ -12,6 +13,8 @@ export default function RestaurantMenu() {
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [menuItems, setMenuItems] = useState<DatabaseMenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
 
   useEffect(() => {
     if (!restaurantId) {
@@ -85,14 +88,56 @@ export default function RestaurantMenu() {
     );
   }
 
-  // Group menu items by category
-  const groupedItems = menuItems.reduce((acc, item) => {
+  // Get all unique categories and allergens for filters
+  const allCategories = useMemo(() => {
+    return Array.from(new Set(menuItems.map(item => item.category)));
+  }, [menuItems]);
+
+  const allAllergens = useMemo(() => {
+    const allergenSet = new Set<string>();
+    menuItems.forEach(item => {
+      if (item.allergens) {
+        item.allergens.forEach(allergen => allergenSet.add(allergen));
+      }
+    });
+    return Array.from(allergenSet).sort();
+  }, [menuItems]);
+
+  // Filter menu items based on selected filters
+  const filteredMenuItems = useMemo(() => {
+    return menuItems.filter(item => {
+      // Filter by category
+      if (selectedCategories.length > 0 && !selectedCategories.includes(item.category)) {
+        return false;
+      }
+      
+      // Filter by allergens (exclude items that contain selected allergens)
+      if (selectedAllergens.length > 0 && item.allergens) {
+        const hasSelectedAllergens = selectedAllergens.some(allergen => 
+          item.allergens!.includes(allergen)
+        );
+        if (hasSelectedAllergens) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [menuItems, selectedCategories, selectedAllergens]);
+
+  // Group filtered menu items by category
+  const groupedItems = filteredMenuItems.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     acc[item.category].push(item);
     return acc;
   }, {} as Record<string, DatabaseMenuItem[]>);
+
+  const handleClearFilters = () => {
+    setSelectedCategories([]);
+    setSelectedAllergens([]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
@@ -118,13 +163,41 @@ export default function RestaurantMenu() {
           </div>
         </header>
         
-        {Object.keys(groupedItems).length === 0 ? (
+        {/* Show filters only if there are menu items */}
+        {menuItems.length > 0 && (
+          <MenuFilters
+            categories={allCategories}
+            allergens={allAllergens}
+            selectedCategories={selectedCategories}
+            selectedAllergens={selectedAllergens}
+            onCategoryChange={setSelectedCategories}
+            onAllergenChange={setSelectedAllergens}
+            onClearFilters={handleClearFilters}
+          />
+        )}
+        
+        {menuItems.length === 0 ? (
           <Card className="max-w-md mx-auto mt-8">
             <CardContent className="p-8 text-center">
               <h2 className="text-xl font-semibold mb-4">No Menu Items Available</h2>
               <p className="text-muted-foreground">
                 This restaurant hasn't added any menu items yet.
               </p>
+            </CardContent>
+          </Card>
+        ) : Object.keys(groupedItems).length === 0 ? (
+          <Card className="max-w-md mx-auto mt-8">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-xl font-semibold mb-4">No Items Match Your Filters</h2>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your filters to see more menu items.
+              </p>
+              <button
+                onClick={handleClearFilters}
+                className="text-primary hover:text-primary/80 font-medium underline"
+              >
+                Clear all filters
+              </button>
             </CardContent>
           </Card>
         ) : (
