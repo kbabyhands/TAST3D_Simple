@@ -101,11 +101,11 @@ export const MenuCard = ({ item }: MenuCardProps) => {
         </div>
       </div>
 
-      {/* Expanded Content Modal */}
+      {/* Expanded Content Modal - 3D View Only */}
       {isExpanded && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-card rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="relative">
+          <div className="bg-card rounded-2xl max-w-2xl w-full max-h-[90vh] shadow-2xl">
+            <div className="relative p-6">
               {/* Close Button */}
               <Button 
                 variant="ghost" 
@@ -116,78 +116,21 @@ export const MenuCard = ({ item }: MenuCardProps) => {
                 ✕
               </Button>
 
-              {/* Header Image */}
-              <div className="h-64 relative overflow-hidden rounded-t-2xl">
-                {!imageError ? (
-                  <img 
-                    src={`https://images.unsplash.com/photo-${1500000000000 + Math.abs(item.id.split('').reduce((a, b) => (a + b.charCodeAt(0)) * 31, 0) % 1000000000)}?w=800&h=400&fit=crop&q=80`}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                    <span className="text-8xl opacity-30">🍽️</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-6 left-6 text-white">
-                  <h2 className="text-3xl font-bold mb-2">{item.name}</h2>
-                  <p className="text-xl opacity-90">{item.price}</p>
-                </div>
+              {/* Header */}
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-foreground mb-2">{item.name}</h2>
+                <p className="text-xl font-semibold text-foreground">{item.price}</p>
               </div>
 
-              {/* Content */}
-              <div className="p-8">
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Description</h3>
-                    <p className="text-muted-foreground leading-relaxed mb-6">
-                      {item.fullDescription}
-                    </p>
-
-                    {/* Dietary Tags */}
-                    {item.dietaryTags.length > 0 && (
-                      <div className="mb-6">
-                        <h4 className="font-medium mb-3">Dietary Information</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {item.dietaryTags.map((tag, index) => (
-                            <Badge key={index} variant="secondary" className="rounded-full">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Allergens */}
-                    {item.allergens.length > 0 && (
-                      <div className="mb-6">
-                        <h4 className="font-medium mb-3">Contains Allergens</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {item.allergens.map((allergen, index) => (
-                            <Badge key={index} variant="destructive" className="rounded-full">
-                              {allergen}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 3D Model Viewer */}
-                  <div>
-                    <h4 className="font-medium mb-4">3D Interactive View</h4>
-                    <div className="w-full h-80 bg-muted rounded-xl overflow-hidden border-2 border-border shadow-inner">
-                      <iframe
-                        src={item.playCanvasUrl}
-                        className="w-full h-full"
-                        title={`${item.name} 3D Model`}
-                        style={{ border: 'none' }}
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-                </div>
+              {/* 3D Model Viewer */}
+              <div className="w-full h-96 bg-muted rounded-xl overflow-hidden border-2 border-border shadow-inner">
+                <iframe
+                  src={item.playCanvasUrl}
+                  className="w-full h-full"
+                  title={`${item.name} 3D Model`}
+                  style={{ border: 'none' }}
+                  loading="lazy"
+                />
               </div>
             </div>
           </div>
