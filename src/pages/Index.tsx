@@ -51,21 +51,6 @@ const Index = () => {
   const sectionsToRender = hasDbItems 
     ? [
         { 
-          section: 'Featured Items', 
-          items: menuItems
-            .slice(0, 6) // Show first 6 items as featured
-            .map(item => ({
-              id: item.id,
-              name: item.name,
-              shortDescription: item.description.substring(0, 120) + '...',
-              fullDescription: item.description,
-              price: `$${item.price.toFixed(2)}`,
-              dietaryTags: [],
-              allergens: [],
-              playCanvasUrl: item.model_url || '/3d-models/truffle-arancini.html'
-            }))
-        },
-        { 
           section: 'Appetizers', 
           items: menuItems
             .filter(item => item.category === 'appetizers')
