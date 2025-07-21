@@ -10,7 +10,7 @@ export const menuData = [
         price: "$16",
         dietaryTags: ["Vegetarian"],
         allergens: ["Dairy", "Eggs", "Gluten"],
-        playCanvasUrl: "https://playcanvas.com/embed/truffle-arancini-3d"
+        playCanvasUrl: "/3d-models/truffle-arancini.html"
       },
       {
         id: "app-2",
@@ -20,7 +20,7 @@ export const menuData = [
         price: "$22",
         dietaryTags: ["Gluten-Free"],
         allergens: ["Shellfish", "Dairy"],
-        playCanvasUrl: "https://playcanvas.com/embed/scallops-3d"
+        playCanvasUrl: "/3d-models/scallops.html"
       },
       {
         id: "app-3",
@@ -30,7 +30,7 @@ export const menuData = [
         price: "$18",
         dietaryTags: [],
         allergens: ["Dairy", "Tree Nuts"],
-        playCanvasUrl: "https://playcanvas.com/embed/burrata-peach-3d"
+        playCanvasUrl: "/3d-models/burrata-peach.html"
       }
     ]
   },
@@ -45,7 +45,7 @@ export const menuData = [
         price: "$85",
         dietaryTags: ["Gluten-Free"],
         allergens: ["Dairy"],
-        playCanvasUrl: "https://playcanvas.com/embed/wagyu-ribeye-3d"
+        playCanvasUrl: "/3d-models/wagyu-ribeye.html"
       },
       {
         id: "ent-2",
@@ -55,7 +55,7 @@ export const menuData = [
         price: "$58",
         dietaryTags: ["Gluten-Free"],
         allergens: ["Shellfish", "Dairy", "Alcohol"],
-        playCanvasUrl: "https://playcanvas.com/embed/lobster-thermidor-3d"
+        playCanvasUrl: "/3d-models/scallops.html"
       },
       {
         id: "ent-3",
@@ -65,7 +65,7 @@ export const menuData = [
         price: "$42",
         dietaryTags: ["Gluten-Free", "Dairy-Free"],
         allergens: [],
-        playCanvasUrl: "https://playcanvas.com/embed/duck-confit-3d"
+        playCanvasUrl: "/3d-models/wagyu-ribeye.html"
       },
       {
         id: "ent-4",
@@ -75,7 +75,7 @@ export const menuData = [
         price: "$32",
         dietaryTags: ["Vegan"],
         allergens: ["Gluten"],
-        playCanvasUrl: "https://playcanvas.com/embed/vegan-wellington-3d"
+        playCanvasUrl: "/3d-models/truffle-arancini.html"
       }
     ]
   },
@@ -90,7 +90,7 @@ export const menuData = [
         price: "$14",
         dietaryTags: ["Vegetarian"],
         allergens: ["Dairy", "Eggs", "Gluten"],
-        playCanvasUrl: "https://playcanvas.com/embed/chocolate-souffle-3d"
+        playCanvasUrl: "/3d-models/chocolate-souffle.html"
       },
       {
         id: "des-2",
@@ -100,7 +100,7 @@ export const menuData = [
         price: "$12",
         dietaryTags: ["Vegetarian"],
         allergens: ["Dairy", "Eggs", "Gluten"],
-        playCanvasUrl: "https://playcanvas.com/embed/lemon-tart-3d"
+        playCanvasUrl: "/3d-models/chocolate-souffle.html"
       },
       {
         id: "des-3",
@@ -110,7 +110,7 @@ export const menuData = [
         price: "$13",
         dietaryTags: ["Vegetarian"],
         allergens: ["Dairy", "Eggs", "Gluten", "Caffeine"],
-        playCanvasUrl: "https://playcanvas.com/embed/tiramisu-3d"
+        playCanvasUrl: "/3d-models/tiramisu.html"
       }
     ]
   }

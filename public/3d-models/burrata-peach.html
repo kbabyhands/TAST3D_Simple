@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Burrata & Peach 3D</title>
+  <style>
+    body { margin: 0; background: linear-gradient(135deg, #fff8dc, #ffe4b5); }
+    canvas { display: block; }
+    #info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: #cd853f;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Drag to rotate • Scroll to zoom</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // Soft lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.7);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    directionalLight.position.set(3, 8, 4);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    // Create wooden board
+    const boardGeometry = new THREE.CylinderGeometry(2.5, 2.5, 0.2, 32);
+    const boardMaterial = new THREE.MeshPhongMaterial({ color: 0xdeb887 });
+    const board = new THREE.Mesh(boardGeometry, boardMaterial);
+    board.position.y = -1;
+    board.receiveShadow = true;
+    scene.add(board);
+
+    const group = new THREE.Group();
+
+    // Burrata cheese
+    const burrataGeometry = new THREE.SphereGeometry(0.6, 16, 12);
+    const burrataMaterial = new THREE.MeshPhongMaterial({ 
+      color: 0xfffef7,
+      shininess: 30,
+      transparent: true,
+      opacity: 0.9
+    });
+    const burrata = new THREE.Mesh(burrataGeometry, burrataMaterial);
+    burrata.position.y = -0.4;
+    burrata.scale.y = 0.7;
+    burrata.castShadow = true;
+
+    // Peach slices
+    for (let i = 0; i < 4; i++) {
+      const peachGeometry = new THREE.SphereGeometry(0.4, 8, 8);
+      const peachMaterial = new THREE.MeshPhongMaterial({ color: 0xffb347 });
+      const peach = new THREE.Mesh(peachGeometry, peachMaterial);
+      
+      const angle = (i * Math.PI * 2) / 4;
+      peach.position.x = Math.cos(angle) * 1.2;
+      peach.position.z = Math.sin(angle) * 1.2;
+      peach.position.y = -0.6;
+      peach.scale.y = 0.3;
+      peach.castShadow = true;
+      
+      // Grill marks on peach
+      const markGeometry = new THREE.PlaneGeometry(0.6, 0.05);
+      const markMaterial = new THREE.MeshPhongMaterial({ color: 0x8b4513 });
+      const mark = new THREE.Mesh(markGeometry, markMaterial);
+      mark.position.copy(peach.position);
+      mark.position.y += 0.1;
+      mark.rotation.x = -Math.PI / 2;
+      
+      group.add(peach);
+      group.add(mark);
+    }
+
+    // Prosciutto slices
+    for (let i = 0; i < 3; i++) {
+      const prosciuttoGeometry = new THREE.PlaneGeometry(1, 0.8);
+      const prosciuttoMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xdc143c,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8
+      });
+      const prosciutto = new THREE.Mesh(prosciuttoGeometry, prosciuttoMaterial);
+      
+      prosciutto.position.x = (Math.random() - 0.5) * 2;
+      prosciutto.position.z = (Math.random() - 0.5) * 2;
+      prosciutto.position.y = -0.2;
+      prosciutto.rotation.y = Math.random() * Math.PI;
+      prosciutto.rotation.x = (Math.random() - 0.5) * 0.5;
+      
+      group.add(prosciutto);
+    }
+
+    // Arugula leaves
+    for (let i = 0; i < 12; i++) {
+      const arugulaGeometry = new THREE.PlaneGeometry(0.3, 0.4);
+      const arugulaMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x228b22,
+        side: THREE.DoubleSide
+      });
+      const arugula = new THREE.Mesh(arugulaGeometry, arugulaMaterial);
+      
+      arugula.position.x = (Math.random() - 0.5) * 4;
+      arugula.position.z = (Math.random() - 0.5) * 4;
+      arugula.position.y = -0.3;
+      arugula.rotation.y = Math.random() * Math.PI;
+      arugula.rotation.x = (Math.random() - 0.5) * 0.8;
+      
+      group.add(arugula);
+    }
+
+    // Pine nuts
+    for (let i = 0; i < 8; i++) {
+      const nutGeometry = new THREE.SphereGeometry(0.05, 6, 6);
+      const nutMaterial = new THREE.MeshPhongMaterial({ color: 0xf5deb3 });
+      const nut = new THREE.Mesh(nutGeometry, nutMaterial);
+      
+      nut.position.x = (Math.random() - 0.5) * 3;
+      nut.position.z = (Math.random() - 0.5) * 3;
+      nut.position.y = -0.2;
+      nut.scale.x = 1.5;
+      
+      group.add(nut);
+    }
+
+    group.add(burrata);
+    scene.add(group);
+    
+    camera.position.set(3, 2, 4);
+    camera.lookAt(0, -0.3, 0);
+
+    // Controls
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    document.addEventListener('mousedown', (e) => { isDragging = true; });
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaMove = {
+          x: e.clientX - previousMousePosition.x,
+          y: e.clientY - previousMousePosition.y
+        };
+        group.rotation.y += deltaMove.x * 0.01;
+        group.rotation.x += deltaMove.y * 0.01;
+      }
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+
+    document.addEventListener('wheel', (e) => {
+      camera.position.multiplyScalar(1 + e.deltaY * 0.001);
+      camera.position.clampLength(2, 8);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!isDragging) {
+        group.rotation.y += 0.005;
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>

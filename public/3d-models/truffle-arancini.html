@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Truffle Arancini 3D</title>
+  <style>
+    body { margin: 0; background: linear-gradient(135deg, #f5f5f0, #ede8d9); }
+    canvas { display: block; }
+    #info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: #8b4513;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">Drag to rotate • Scroll to zoom</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 5);
+    directionalLight.castShadow = true;
+    scene.add(directionalLight);
+
+    const spotLight = new THREE.SpotLight(0xfff4e6, 0.5);
+    spotLight.position.set(-5, 8, 3);
+    scene.add(spotLight);
+
+    // Create plate
+    const plateGeometry = new THREE.CylinderGeometry(2, 2, 0.1, 32);
+    const plateMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    const plate = new THREE.Mesh(plateGeometry, plateMaterial);
+    plate.position.y = -1;
+    plate.receiveShadow = true;
+    scene.add(plate);
+
+    // Create arancini balls
+    const group = new THREE.Group();
+    
+    for (let i = 0; i < 3; i++) {
+      const ballGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+      const ballMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xdaa520,
+        shininess: 30,
+        bumpScale: 0.05
+      });
+      const ball = new THREE.Mesh(ballGeometry, ballMaterial);
+      
+      const angle = (i * Math.PI * 2) / 3;
+      ball.position.x = Math.cos(angle) * 0.8;
+      ball.position.z = Math.sin(angle) * 0.8;
+      ball.position.y = -0.5;
+      ball.castShadow = true;
+      
+      group.add(ball);
+    }
+
+    // Add garnish (microgreens)
+    for (let i = 0; i < 8; i++) {
+      const leafGeometry = new THREE.PlaneGeometry(0.1, 0.2);
+      const leafMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x228b22,
+        side: THREE.DoubleSide
+      });
+      const leaf = new THREE.Mesh(leafGeometry, leafMaterial);
+      
+      leaf.position.x = (Math.random() - 0.5) * 3;
+      leaf.position.z = (Math.random() - 0.5) * 3;
+      leaf.position.y = -0.4;
+      leaf.rotation.y = Math.random() * Math.PI;
+      
+      group.add(leaf);
+    }
+
+    scene.add(group);
+    camera.position.set(3, 2, 4);
+    camera.lookAt(0, -0.5, 0);
+
+    // Controls
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    document.addEventListener('mousedown', (e) => { isDragging = true; });
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const deltaMove = {
+          x: e.clientX - previousMousePosition.x,
+          y: e.clientY - previousMousePosition.y
+        };
+        group.rotation.y += deltaMove.x * 0.01;
+        group.rotation.x += deltaMove.y * 0.01;
+      }
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+    });
+    document.addEventListener('mouseup', () => { isDragging = false; });
+
+    document.addEventListener('wheel', (e) => {
+      camera.position.multiplyScalar(1 + e.deltaY * 0.001);
+      camera.position.clampLength(2, 8);
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!isDragging) {
+        group.rotation.y += 0.005;
+      }
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
